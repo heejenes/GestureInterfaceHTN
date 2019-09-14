@@ -117,7 +117,7 @@ while True:
 	#generates mask
 	colorMask = cv2.inRange(hsv,lower,upper)
 	
-	colorMask = cv2.blur(colorMask, (5,5))
+	colorMask = cv2.medianBlur(colorMask, 3)
 	
 	#generates contour
 	cont, a = cv2.findContours(colorMask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
@@ -133,8 +133,10 @@ while True:
 		cv2.drawContours(mainWCont, [mainCont], 0, (0,255,0),3)
 	
 		#generates hull
-		hull = cv2.convexHull(mainCont, False)
-		#print("hull is: ",hull)
+		hullIndex = cv2.convexHull(mainCont, returnPoints = False)
+		hull = []
+		[hull.append(mainCont[i][0]) for i in hullIndex]
+		#print("hull is: ",hull[0])
 		
 		#general functions
 		def dist(pointA,pointB):
@@ -185,8 +187,11 @@ while True:
 		
 		
 		#convexity defects
-		#defects = cv2.convexityDefects(mainCont, finalHull)
-		#print(defects)
+		defects = cv2.convexityDefects(mainCont, hullIndex)
+		if type(defects) is np.ndarray:
+			print(defects[0][0][2])
+			print(mainCont[defects[0][0][2]][0])
+			[cv2.circle(mainWCont, tuple(mainCont[curPoint[0][2]][0]),20,(0,0,255),5) for curPoint in defects]
 
 	cv2.imshow("Main", lines_edges)
 	cv2.imshow("Mask", colorMask)
