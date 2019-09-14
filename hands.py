@@ -74,11 +74,27 @@ def assign_trackbar(window):
 	params = [HMax, HMin, SMax, SMin, VMax, VMin, Blur]
 	return params
 
+cv2.namedWindow('Skin')
+
+cv2.createTrackbar("HMax", "Skin",124,255,nothing)
+cv2.createTrackbar("HMin", "Skin",0,255,nothing)
+
+cv2.createTrackbar("SMax", "Skin",255,255,nothing)
+cv2.createTrackbar("SMin", "Skin",1,255,nothing)
+
+cv2.createTrackbar("VMax", "Skin",255,255,nothing)
+cv2.createTrackbar("VMin", "Skin",8,255,nothing)
+
+cv2.createTrackbar("Blur", "Skin",6,10,nothing)
+
+
 cv2.namedWindow('awb')
 cv2.createTrackbar("bg1", "awb", 15, 80, nothing)
 cv2.createTrackbar("rg1", "awb", 12, 80, nothing)
 cv2.createTrackbar("iso", "awb", 800, 800, nothing)
 cv2.createTrackbar("comp", "awb", 25, 50, nothing)
+
+cv2.createTrackbar("threshold", "awb", 5, 20, nothing)
 
 s = 400
 #frame = cv2.resize(frame, (s,s), 0, 0, cv2.INTER_AREA)
@@ -104,6 +120,7 @@ while True:
 	#guassian = cv2.getTrackbarPos("Gaussian", "Green")
 	#if guassian % 2 == 0:
 	#	guassian += 1
+	threshold = cv2.getTrackbarPos("iso", "awb") / 10
 	frame = vs.read()
 	#frame = cv2.imread('1.jpg')
 	#frame = cv2.resize(frame, (s,s), 0, 0, cv2.INTER_AREA)
@@ -114,36 +131,41 @@ while True:
 	#blur = cv2.GaussianBlur(hsv,(guassian,guassian),0)
 
 	#TAEHOON########################################
-	#hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+	hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 	#background color is [255,255,255]
 	
-	#upper = np.array([20,255,255])
-	#lower = np.array([0,48,80])
+	skin_params = assign_trackbar("Skin")
+	#print(skin_params)
+	lower = np.array([skin_params[1],skin_params[3],skin_params[5]])
+	upper = np.array([skin_params[0],skin_params[2],skin_params[4]])
 	#generates mask
-	#colorMask = cv2.inRange(hsv,lower,upper)
+	colorMask = cv2.inRange(hsv,lower,upper)
 
 	if frame_count < 30:
 		run_avg(gray, aWeight)
+		print("calibrating")
 	else:
 			# segment the hand region
-			hand = segment(gray)
+			#hand = segment(gray, threshold)
 
 			# check whether hand region is segmented
 			if hand is not None:
+				pass
 				# if yes, unpack the thresholded image and
 				# segmented region
-				(thresholded, segmented) = hand
+				#(thresholded, segmented) = hand
 
 				# draw the segmented region and display the frame
 				#cv2.drawContours(clone, [segmented + (right, top)], -1, (0, 0, 255))
 				#cv2.imshow("Thesholded", thresholded)
 
-	if hand is not None:
-		(thresholded, segmented) = hand
-		thresholded = cv2.medianBlur(thresholded, 3)
+	if frame is not None:
+		#print("not none")
+		#(thresholded, segmented) = hand
+		colorMask = cv2.medianBlur(colorMask, skin_params[6])
 		
 		#generates contour
-		cont, a = cv2.findContours(thresholded ,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+		cont, a = cv2.findContours(colorMask ,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
 		#print(len(cont))
 		if len(cont)>0:
 			longest = 0
@@ -201,24 +223,24 @@ while True:
 					continue
 				finalHull.append([average(group)])
 			#print("finalhull is: ", finalHull)
-			[cv2.circle(mainWCont, tuple(curPoint[0]),20,(0,0,255),5) for curPoint in finalHull]
+			#[cv2.circle(mainWCont, tuple(curPoint[0]),20,(0,0,255),5) for curPoint in finalHull]
 			
 			
 			cv2.drawContours(mainWCont, [np.array(finalHull)], 0, (0,255,0),3)
-			
-			cv2.imshow("Cont", mainWCont)
-			
 			
 			#convexity defects
 			defects = cv2.convexityDefects(mainCont, hullIndex)
 			if type(defects) is np.ndarray:
 				print(defects[0][0][2])
 				print(mainCont[defects[0][0][2]][0])
-				[cv2.circle(mainWCont, tuple(mainCont[curPoint[0][2]][0]),20,(0,0,255),5) for curPoint in defects]
+				[cv2.circle(mainWCont, tuple(mainCont[curPoint[0][2]][0]),20,(255,0,255),5) for curPoint in defects]
+				cv2.imshow("Cont", mainWCont)
+			else:
+				cv2.imshow("Cont", mainWCont)
 
 	cv2.imshow("Main", lines_edges)
-	if hand is not None:
-		cv2.imshow("Mask", thresholded)
+	if colorMask is not None:
+		cv2.imshow("Mask", colorMask)
 	
 	key = cv2.waitKey(1) & 0xFF
 
