@@ -346,7 +346,7 @@ while True:
 						mouse_velocity[0] = (mouse_zero_zero[0] - avg_finger_pos[0])/ 2
 					if avg_finger_pos[1] != 0:
 						mouse_velocity[1] = (mouse_zero_zero[1] - avg_finger_pos[1])/ 2
-					print(mouse_velocity, mouse_zero_zero, avg_finger_pos)
+					#print(mouse_velocity, mouse_zero_zero, avg_finger_pos)
 					
 
 			else:
@@ -371,23 +371,25 @@ while True:
 			if mouse_velocity[0] != 0 or mouse_velocity[1] != 0:
 				mouse.move(speed * mouse_velocity[0], speed * mouse_velocity[1])
 
-			final = total_fingers
-			if final == 3:
-				mouse.press(Button.left)
-				mouse_clicked = True
-			if final == 2:
-				mouse.press(Button.middle)
-				mouse_clicked = True
-			if final == 1:
-				mouse.press(Button.right)
-				mouse_clicked = True
+			if mouse_zero_zero[0] != 0 and mouse_zero_zero[1] != 0:
+				print(total_fingers)
+				final = total_fingers
+				if final == 3 and not mouse_clicked:
+					mouse.press(Button.left)
+					mouse_clicked = True
+				elif final == 2 and not mouse_clicked:
+					mouse.press(Button.middle)
+					mouse_clicked = True
+				elif final == 1 and not mouse_clicked:
+					mouse.press(Button.right)
+					mouse_clicked = True
 
-			if final == 4:
-				if mouse_clicked:
-					mouse.release(Button.left)
-					mouse.release(Button.right)
-					mouse.release(Button.middle)
-					mouse_clicked = False
+				elif final == 4:
+					if mouse_clicked:
+						mouse.release(Button.left)
+						mouse.release(Button.right)
+						mouse.release(Button.middle)
+						mouse_clicked = False
 
 	cv2.imshow("Main", lines_edges)
 	if colorMask is not None:
@@ -419,4 +421,4 @@ print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
 # do a bit of cleanup
 cv2.destroyAllWindows()
 vs.stop()
-# I am helping - Adeeb Mahmud
+# I am helping - Michael Denissov, Taehoon Kim, Adeeb Mahmud
