@@ -109,10 +109,10 @@ cv2.createTrackbar("HMax", "Skin",176,255,nothing)
 cv2.createTrackbar("HMin", "Skin",0,255,nothing)
 
 cv2.createTrackbar("SMax", "Skin",255,255,nothing)
-cv2.createTrackbar("SMin", "Skin",1,255,nothing)
+cv2.createTrackbar("SMin", "Skin",127,255,nothing)
 
 cv2.createTrackbar("VMax", "Skin",255,255,nothing)
-cv2.createTrackbar("VMin", "Skin",50,255,nothing)
+cv2.createTrackbar("VMin", "Skin",100,255,nothing)
 
 cv2.createTrackbar("Blur", "Skin",6,10,nothing)
 
@@ -374,13 +374,13 @@ while True:
 			if mouse_zero_zero[0] != 0 and mouse_zero_zero[1] != 0:
 				print(total_fingers)
 				final = total_fingers
-				if final == 3 and not mouse_clicked:
+				if final == 3: #and not mouse_clicked:
 					mouse.press(Button.left)
 					mouse_clicked = True
-				elif final == 2 and not mouse_clicked:
+				elif final == 2: #and not mouse_clicked:
 					mouse.press(Button.middle)
 					mouse_clicked = True
-				elif final == 1 and not mouse_clicked:
+				elif final == 1: #and not mouse_clicked:
 					mouse.press(Button.right)
 					mouse_clicked = True
 
